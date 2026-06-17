@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC & ICT Advanced Trading Engine</title>
+    
+    <!-- PWA Meta Tags & Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#111827">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4256/4256900.png">
+
+    <style>
+        :root {
+            --bg-color: #080b11;
+            --card-bg: #111827;
+            --card-header-bg: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --accent-green: #10b981;
+            --accent-red: #f43f5e;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --border-color: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 15px;
+            padding-bottom: 60px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Settings Card */
+        .settings-card {
+            background-color: var(--card-bg);
+            border: 1px dashed var(--accent-blue);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .settings-card h3 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: var(--accent-blue);
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: white;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        /* Selector styling */
+        .selector-container {
+            margin-bottom: 15px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: white;
+            border: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--card-header-bg);
+            padding: 12px 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .price-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 5px 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* Signal Box Styles */
+        .signal-box {
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .signal-buy {
+            background-color: rgba(16, 185, 129, 0.08);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .signal-sell {
+            background-color: rgba(244, 63, 94, 0.08);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .signal-none {
+            background-color: rgba(156, 163, 175, 0.05);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .signal-error {
+            background-color: rgba(244, 63, 94, 0.1);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .signal-params {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+            border-top: 1px dashed rgba(255,255,255,0.08);
+            padding-top: 12px;
+        }
+
+        .param-col {
+            text-align: center;
+        }
+
+        .param-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .param-val {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        /* Lists and rows */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.85rem;
+        }
+        .stat-row:last-child { border: none; }
+        .stat-label { color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+        .stat-value { font-weight: bold; }
+
+        .direction-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-bullish { background-color: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .badge-bearish { background-color: rgba(244, 63, 94, 0.15); color: var(--accent-red); }
+        .badge-neutral { background-color: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
+
+        .btn-refresh {
+            width: 100%;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .disclaimer {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 25px;
+            line-height: 1.4;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .pill-green { background-color: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+        .pill-red { background-color: rgba(244, 63, 94, 0.2); color: var(--accent-red); }
+        .pill-purple { background-color: rgba(139, 92, 246, 0.2); color: var(--accent-purple); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SMC & ICT Advanced Analysis Engine</h1>
+        <div class="subtitle">Liquidity Pools, Imbalances & Structure Mapping</div>
+    </header>
+
+    <!-- Twelve Data API Configuration -->
+    <div class="settings-card">
+        <h3>🔑 Forex & Spot Gold API Settings</h3>
+        <input type="password" id="api-key" class="api-input" placeholder="Enter Twelve Data API Key to unlock Forex / Spot Gold" onchange="saveKey()">
+        <p style="font-size: 0.72rem; color: var(--text-secondary);">
+            Get a free API key at <a href="https://twelvedata.com/" target="_blank" style="color: var(--accent-blue); text-decoration: none;">twelvedata.com</a>
+        </p>
+    </div>
+
+    <!-- Asset Selector -->
+    <div class="selector-container">
+        <select id="asset-select" onchange="handleAssetChange()">
+            <option value="BINANCE:BTCUSDT">Bitcoin (BTC/USDT) [Free]</option>
+            <option value="BINANCE:ETHUSDT">Ethereum (ETH/USDT) [Free]</option>
+            <option value="BINANCE:PAXGUSDT">Gold Proxy (PAXG/USDT) [Free]</option>
+            <option value="TD:EUR/USD">EUR/USD (Forex) [Requires Key]</option>
+            <option value="TD:GBP/USD">GBP/USD (Forex) [Requires Key]</option>
+            <option value="TD:XAU/USD">Spot Gold (XAU/USD) [Requires Key]</option>
+        </select>
+    </div>
+
+    <div class="grid-container">
+        <!-- Live Price Card -->
+        <div class="card">
+            <div class="card-header">
+                <span>Live Tracker</span>
+                <span id="asset-tag" style="color: var(--accent-blue);">BTC/USDT</span>
+            </div>
+            <div class="card-body">
+                <div class="price-val" id="asset-price">Loading...</div>
+                <div id="market-badge" class="direction-badge badge-neutral">Initializing...</div>
+            </div>
+        </div>
+
+        <!-- SMC & ICT Signals Panel -->
+        <div class="card">
+            <div class="card-header">
+                <span>🤖 Smart Money Signal Generator</span>
+            </div>
+            <div class="card-body" id="signal-display">
+                <div class="signal-box signal-none">
+                    <div class="signal-header">Scanning Order Flow...</div>
+                    Aligning market structure elements. Run a refresh to begin.
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Structure & Liquidity Pool Data -->
+        <div class="card">
+            <div class="card-header">
+                <span>📊 Smart Money Matrix</span>
+            </div>
+            <div class="card-body">
+                <div class="stat-row">
+                    <span class="stat-label">Buy-side Liquidity (BSL) <span class="pill pill-purple">resistance</span></span>
+                    <span id="val-bsl" class="stat-value">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Sell-side Liquidity (SSL) <span class="pill pill-purple">support</span></span>
+                    <span id="val-ssl" class="stat-value">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Fair Value Gap (FVG) Status</span>
+                    <span id="val-fvg" class="stat-value">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Market Structure State</span>
+                    <span id="val-mss" class="stat-value">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classic S/R & Indicators -->
+        <div class="card">
+            <div class="card-header">
+                <span>📈 Traditional Technical Matrix</span>
+            </div>
+            <div class="card-body">
+                <div class="stat-row">
+                    <span class="stat-label">Strong Support Zone</span>
+                    <span id="val-supp" class="stat-value">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Strong Resistance Zone</span>
+                    <span id="val-res" class="stat-value">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">RSI (14-period)</span>
+                    <span id="val-rsi" class="stat-value">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">SMA (50-period Trend)</span>
+                    <span id="val-sma50" class="stat-value">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-refresh" onclick="fetchData()">Evaluate & Calculate Patterns</button>
+
+    <div class="disclaimer">
+        Disclaimer: This dashboard relies on mathematical algorithms applied to historical price trends (RSI, Moving Averages, Support/Resistance zones, Fair Value Gaps, and Liquidity Pools) and news feeds. It is built strictly for educational purposes. No indicator is guaranteed to be accurate; do not treat this information as financial or investment advice.
+    </div>
+
+    <script>
+        // Store and retrieve Key
+        document.getElementById('api-key').value = localStorage.getItem('twelve_data_key') || '';
+
+        function saveKey() {
+            const key = document.getElementById('api-key').value.trim();
+            localStorage.setItem('twelve_data_key', key);
+            fetchData();
+        }
+
+        function handleAssetChange() {
+            fetchData();
+        }
+
+        // Standard Technical Indicator Math
+        function calculateSMA(prices, period) {
+            if (!prices || prices.length < period) return 0;
+            let sum = prices.slice(-period).reduce((a, b) => a + b, 0);
+            return (sum / period);
+        }
+
+        function calculateRSI(closes, period = 14) {
+            if (!closes || closes.length <= period) return 50;
+            let changes = [];
+            for (let i = 1; i < closes.length; i++) {
+                changes.push(closes[i] - closes[i - 1]);
+            }
+            let gains = changes.slice(-period).filter(v => v > 0).reduce((a, b) => a + b, 0) / period;
+            let losses = changes.slice(-period).filter(v => v < 0).reduce((a, b) => a - b, 0) / period;
+            if (losses === 0) return 100;
+            let rs = gains / losses;
+            return Math.round(100 - (100 / (1 + rs)));
+        }
+
+        // --- 1. HISTORICAL SUPPORT & RESISTANCE ENGINE ---
+        function extractSupportResistance(candles) {
+            let supports = [];
+            let resistances = [];
+            if (!candles || candles.length < 10) {
+                return { support: 0, resistance: 0 };
+            }
+            for (let i = 5; i < candles.length - 5; i++) {
+                let isHigh = true;
+                let isLow = true;
+                for (let j = -5; j <= 5; j++) {
+                    if (j === 0) continue;
+                    if (candles[i].h < candles[i+j].h) isHigh = false;
+                    if (candles[i].l > candles[i+j].l) isLow = false;
+                }
+                if (isHigh) resistances.push(candles[i].h);
+                if (isLow) supports.push(candles[i].l);
+            }
+            if (supports.length === 0) supports.push(Math.min(...candles.map(c => c.l)));
+            if (resistances.length === 0) resistances.push(Math.max(...candles.map(c => c.h)));
+            return {
+                support: supports[supports.length - 1] || 0,
+                resistance: resistances[resistances.length - 1] || 0
+            };
+        }
+
+        // --- 2. FAIR VALUE GAP (FVG) DETECTION ---
+        function findFairValueGaps(candles) {
+            let bullishFVG = null;
+            let bearishFVG = null;
+            if (!candles || candles.length < 15) return { bullishFVG, bearishFVG };
+            
+            for (let i = candles.length - 2; i > candles.length - 15; i--) {
+                const c1 = candles[i-2];
+                const c2 = candles[i-1];
+                const c3 = candles[i];
+                if (!c1 || !c2 || !c3) continue;
+
+                if (c1.h < c3.l && c2.c > c2.o) {
+                    bullishFVG = { bottom: c1.h, top: c3.l, price: (c1.h + c3.l) / 2 };
+                    break;
+                }
+                if (c1.l > c3.h && c2.c < c2.o) {
+                    bearishFVG = { top: c1.l, bottom: c3.h, price: (c1.l + c3.h) / 2 };
+                    break;
+                }
+            }
+            return { bullishFVG, bearishFVG };
+        }
+
+        // --- 3. LIQUIDITY POOL ALGORITHM ---
+        function identifyLiquidityPools(candles) {
+            if (!candles || candles.length < 41) return { bsl: 0, ssl: 0 };
+            const lookback = candles.slice(-41, -1);
+            const bsl = Math.max(...lookback.map(c => c.h)); 
+            const ssl = Math.min(...lookback.map(c => c.l)); 
+            return { bsl, ssl };
+        }
+
+        async function fetchBinanceData(symbol) {
+            const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=100`);
+            if (!response.ok) throw new Error("BINANCE_NETWORK_ERROR");
+            const data = await response.json();
+            if (!Array.isArray(data) || data.length === 0) throw new Error("INVALID_BINANCE_DATA");
+            return data.map(d => ({
+                o: parseFloat(d[1]),
+                h: parseFloat(d[2]),
+                l: parseFloat(d[3]),
+                c: parseFloat(d[4]),
+                v: parseFloat(d[5])
+            }));
+        }
+
+        async function fetchTwelveData(symbol, key) {
+            if (!key) throw new Error("API_KEY_MISSING");
+            const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1h&outputsize=100&apikey=${key}`);
+            if (!response.ok) throw new Error("TWELVE_DATA_CONNECTION_FAILED");
+            const data = await response.json();
+            
+            // Explicitly handle standard Twelve Data API rate limit/error payloads
+            if (data.status === 'error') {
+                throw new Error(data.message || "TWELVE_DATA_API_ERROR");
+            }
+            if (!data.values || !Array.isArray(data.values) || data.values.length === 0) {
+                throw new Error("EMPTY_DATASET_RETURNED");
+            }
+            
+            return data.values.map(d => ({
+                o: parseFloat(d.open),
+                h: parseFloat(d.high),
+                l: parseFloat(d.low),
+                c: parseFloat(d.close),
+                v: parseFloat(d.volume || 0)
+            })).reverse();
+        }
+
+        async function fetchMarketData() {
+            const selectVal = document.getElementById('asset-select').value;
+            const [source, symbol] = selectVal.split(':');
+            const apiKey = document.getElementById('api-key').value.trim();
+            
+            document.getElementById('asset-tag').innerText = symbol;
+
+            try {
+                // UI feedback before starting calculation
+                document.getElementById('asset-price').innerText = "Loading...";
+                document.getElementById('market-badge').innerText = "Analyzing...";
+                document.getElementById('market-badge').className = "direction-badge badge-neutral";
+
+                let candles = [];
+                if (source === 'BINANCE') {
+                    candles = await fetchBinanceData(symbol);
+                } else {
+                    candles = await fetchTwelveData(symbol, apiKey);
+                }
+
+                // Defensive check to block calculations if dataset is invalid
+                if (!candles || candles.length < 50) {
+                    throw new Error("INSUFFICIENT_HISTORICAL_CANDLES");
+                }
+
+                const len = candles.length;
+                const c1 = candles[len - 1]; 
+                const c2 = candles[len - 2]; 
+                const currentPrice = c1.c;
+                
+                document.getElementById('asset-price').innerText = currentPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+
+                const closes = candles.map(c => c.c);
+                const rsi = calculateRSI(closes, 14);
+                const sma50 = calculateSMA(closes, 50);
+
+                document.getElementById('val-rsi').innerText = rsi;
+                document.getElementById('val-sma50').innerText = sma50.toLocaleString(undefined, {maximumFractionDigits: 4});
+
+                const liquidity = identifyLiquidityPools(candles);
+                const srZones = extractSupportResistance(candles);
+                const fvgData = findFairValueGaps(candles);
+
+                document.getElementById('val-bsl').innerText = `$${liquidity.bsl.toLocaleString(undefined, {maximumFractionDigits: 4})}`;
+                document.getElementById('val-ssl').innerText = `$${liquidity.ssl.toLocaleString(undefined, {maximumFractionDigits: 4})}`;
+                document.getElementById('val-supp').innerText = `$${srZones.support.toLocaleString(undefined, {maximumFractionDigits: 4})}`;
+                document.getElementById('val-res').innerText = `$${srZones.resistance.toLocaleString(undefined, {maximumFractionDigits: 4})}`;
+
+                let fvgStatusText = "None Detected";
+                let fvgStatusClass = "";
+                if (fvgData.bullishFVG) {
+                    fvgStatusText = `Bullish Imbalance ($${fvgData.bullishFVG.price.toFixed(2)})`;
+                    fvgStatusClass = "pill-green";
+                } else if (fvgData.bearishFVG) {
+                    fvgStatusText = `Bearish Imbalance ($${fvgData.bearishFVG.price.toFixed(2)})`;
+                    fvgStatusClass = "pill-red";
+                }
+                document.getElementById('val-fvg').innerHTML = fvgStatusText ? `<span class="pill ${fvgStatusClass}">${fvgStatusText}</span>` : "-";
+
+                let mssState = "CHoCH / Neutral";
+                let mssClass = "badge-neutral";
+                let sweptLiquidity = false;
+                let sweptType = ""; 
+
+                if (c1.l < liquidity.ssl && currentPrice > liquidity.ssl) {
+                    sweptLiquidity = true;
+                    sweptType = "SSL";
+                } else if (c1.h > liquidity.bsl && currentPrice < liquidity.bsl) {
+                    sweptLiquidity = true;
+                    sweptType = "BSL";
+                }
+
+                if (currentPrice > srZones.resistance) {
+                    mssState = "BOS (Bullish Shift)";
+                    mssClass = "pill-green";
+                } else if (currentPrice < srZones.support) {
+                    mssState = "BOS (Bearish Shift)";
+                    mssClass = "pill-red";
+                }
+                document.getElementById('val-mss').innerHTML = `<span class="pill ${mssClass}">${mssState}</span>`;
+
+                let signal = "NONE";
+                let triggerReason = "Scanning order blocks. No active sweeps or key mitigations detected yet.";
+
+                if (sweptLiquidity && sweptType === "SSL" && fvgData.bullishFVG) {
+                    signal = "BUY";
+                    triggerReason = "SMC Setup: Swept Sell-side Liquidity (SSL) followed by strong upward displacement. A Bullish FVG sits below as a valid mitigation entry level.";
+                } else if (currentPrice <= srZones.support && rsi < 30) {
+                    signal = "BUY";
+                    triggerReason = "Standard Setup: Price retesting a high-timeframe fractal support floor with oversold RSI readings.";
+                } else if (sweptLiquidity && sweptType === "BSL" && fvgData.bearishFVG) {
+                    signal = "SELL";
+                    triggerReason = "SMC Setup: Swept Buy-side Liquidity (BSL) followed by sudden downward displacement. A Bearish FVG acts as a high-probability supply entry level.";
+                } else if (currentPrice >= srZones.resistance && rsi > 70) {
+                    signal = "SELL";
+                    triggerReason = "Standard Setup: Price testing a high-timeframe fractal resistance ceiling with overbought RSI conditions.";
+                }
+
+                let signalHTML = "";
+                if (signal === "NONE") {
+                    signalHTML = `
+                        <div class="signal-box signal-none">
+                            <div class="signal-header">
+                                <span>MARKET STATUS: WAIT</span>
+                            </div>
+                            <p style="font-size: 0.85rem; line-height: 1.4;">${triggerReason}</p>
+                        </div>
+                    `;
+                } else {
+                    let entry = currentPrice;
+                    let sl = 0;
+                    let tp = 0;
+
+                    if (signal === "BUY") {
+                        sl = Math.min(srZones.support, liquidity.ssl) * 0.997; 
+                        const risk = entry - sl;
+                        tp = entry + (risk * 2.0); 
+                    } else {
+                        sl = Math.max(srZones.resistance, liquidity.bsl) * 1.003; 
+                        const risk = sl - entry;
+                        tp = entry - (risk * 2.0); 
+                    }
+
+                    signalHTML = `
+                        <div class="signal-box ${signal === 'BUY' ? 'signal-buy' : 'signal-sell'}">
+                            <div class="signal-header">
+                                <span>⚡ ${signal} SIGNAL ACTIVATED</span>
+                                <span style="font-size:0.75rem; background:rgba(255,255,255,0.15); padding:2px 8px; border-radius:10px;">R:R 1:2.0</span>
+                            </div>
+                            <p style="font-size: 0.85rem; line-height: 1.4; margin-bottom: 12px;">${triggerReason}</p>
+                            
+                            <div class="signal-params">
+                                <div class="param-col">
+                                    <div class="param-label">LIMIT ENTRY</div>
+                                    <div class="param-val">$${entry.toLocaleString(undefined, {maximumFractionDigits: 4})}</div>
+                                </div>
+                                <div class="param-col">
+                                    <div class="param-label" style="color:var(--accent-red);">STOP LOSS</div>
+                                    <div class="param-val" style="color:var(--accent-red);">$${sl.toLocaleString(undefined, {maximumFractionDigits: 4})}</div>
+                                </div>
+                                <div class="param-col">
+                                    <div class="param-label" style="color:var(--accent-green);">TAKE PROFIT</div>
+                                    <div class="param-val" style="color:var(--accent-green);">$${tp.toLocaleString(undefined, {maximumFractionDigits: 4})}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('signal-display').innerHTML = signalHTML;
+                
+                let trendVerdict = "Consolidating";
+                let trendClass = "badge-neutral";
+                if (currentPrice > sma50) { trendVerdict = "Bullish Phase"; trendClass = "badge-bullish"; }
+                else if (currentPrice < sma50) { trendVerdict = "Bearish Phase"; trendClass = "badge-bearish"; }
+                
+                document.getElementById('market-badge').innerText = trendVerdict;
+                document.getElementById('market-badge').className = `direction-badge ${trendClass}`;
+
+            } catch (error) {
+                console.error("DIAGNOSTICS ERROR: ", error);
+                
+                // Set default displays on error
+                document.getElementById('asset-price').innerText = "Error";
+                document.getElementById('market-badge').innerText = "Failed";
+                document.getElementById('market-badge').className = "direction-badge badge-bearish";
+                
+                let errorMessageText = error.message;
+
+                // Provide direct explanations on the screen
+                if (errorMessageText === "API_KEY_MISSING") {
+                    document.getElementById('signal-display').innerHTML = `
+                        <div class="signal-box signal-error">
+                            <div class="signal-header">🔑 API Key Missing</div>
+                            <p style="font-size: 0.8rem; line-height: 1.4;">To fetch Forex indices or Spot Gold (XAU/USD), you must register a free API Key on <strong>twelvedata.com</strong> and paste it into the key configuration field above.</p>
+                        </div>`;
+                } else if (errorMessageText.includes("rate limit") || errorMessageText.includes("credits")) {
+                    document.getElementById('signal-display').innerHTML = `
+                        <div class="signal-box signal-error">
+                            <div class="signal-header">⏳ API Rate Limit Hit</div>
+                            <p style="font-size: 0.8rem; line-height: 1.4;">Twelve Data restricts free accounts to 8 requests per minute. Wait 60 seconds and try clicking 'Refresh' again.</p>
+                        </div>`;
+                } else {
+                    document.getElementById('signal-display').innerHTML = `
+                        <div class="signal-box signal-error">
+                            <div class="signal-header">❌ System Error</div>
+                            <p style="font-size: 0.8rem; line-height: 1.4; margin-bottom: 5px;">A connection or validation error occurred:</p>
+                            <code style="font-size: 0.72rem; background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; display: block;">${errorMessageText}</code>
+                            <p style="font-size: 0.75rem; margin-top: 5px; color: var(--text-secondary);">If you selected Gold/Forex, double check your Twelve Data API key is pasted correctly.</p>
+                        </div>`;
+                }
+            }
+        }
+
+        // PWA Service Worker Hook
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker Registered'))
+                    .catch(err => console.log('Service Worker Failed: ', err));
+            });
+        }
+
+        function fetchData() {
+            fetchMarketData();
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
